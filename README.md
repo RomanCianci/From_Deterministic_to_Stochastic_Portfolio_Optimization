@@ -48,15 +48,18 @@ $$
 ## 2. Integer Programming for Constraints
 
 To make the portfolio realistic, we introduce **Mixed-Integer Linear Programming (MILP)** constraints:
-1.  **Cardinality:** Use a maximum of $K$ assets.
-2.  **Buy-in Thresholds:** If an asset is selected, its weight must be between $w_i^{min}$ and $w_i^{max}$.
+
+1. **Cardinality:** Use a maximum of $K$ assets.
+2. **Buy-in Thresholds:** If an asset is selected, its weight must be between $w_i^{min}$ and $w_i^{max}$.
 
 We define binary variables $y_i$:
+
 $$
 y_i = \begin{cases} 1 & \text{if asset } i \text{ is selected} \\ 0 & \text{otherwise} \end{cases}
 $$
 
 The additional constraints are:
+
 $$
 \begin{cases} 
 \sum_{i} y_i \le K \\ 
