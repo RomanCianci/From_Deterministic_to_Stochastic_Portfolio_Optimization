@@ -43,7 +43,7 @@ To verify the code functionality immediately without downloading the massive Sto
     python generate_toy_data.py
     ```
 
-    *(This creates a `../data/sample/generated_data` folder with synthetic assets).*
+    *(This creates a `../data/sample/generated` folder with synthetic assets).*
 
 4.  **Run the backtest in Demo Mode:**
 
@@ -89,3 +89,5 @@ Our analysis of the 2022-2025 volatile period reveals:
 ## 📜 License
 
 This project is released under the MIT License.
+
+```
