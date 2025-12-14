@@ -4,6 +4,7 @@ import pulp as pl
 from typing import Dict, Optional, List
 import matplotlib.pyplot as plt
 import glob
+import argparse
 import os
 
 
@@ -224,18 +225,27 @@ def optimize_dynamic_mad_lp(returns: pd.DataFrame, target_return: float, periods
 
 if __name__ == "__main__":
 
-    import os
-    BASE_PATH = os.path.join(os.path.dirname(__file__), "..", "data")
-    
-    WORLD_BASE_PATHS = [
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\bonds",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\cryptocurrencies",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\currencies\\major",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\currencies\\other",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\money market",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\stooq stocks indices",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\indices",
-    ]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--demo', action='store_true', help='Run with toy data')
+    args = parser.parse_args()
+
+    BASE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
+
+    if args.demo:
+        print("Warning : We are currently running on demo mode (toy data)")
+        BASE_PATH = os.path.join(BASE_DIR, 'sample')
+        WORLD_BASE_PATHS = [BASE_PATH]
+    else:
+        BASE_PATH = BASE_DIR
+        WORLD_BASE_PATHS = [
+            f"{BASE_PATH}/d_world_txt/data/daily/world/bonds",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/cryptocurrencies",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/currencies/major",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/currencies/other",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/money market",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/stooq stocks indices",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/indices",
+        ]
     
 
     dfs = load_stooq_assets_glob_all(WORLD_BASE_PATHS)

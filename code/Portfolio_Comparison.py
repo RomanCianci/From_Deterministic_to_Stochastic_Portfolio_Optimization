@@ -4,6 +4,7 @@ import pulp as pl
 from typing import Dict, List, Optional, Callable
 import matplotlib.pyplot as plt
 import glob
+import argparse
 import os
 from tqdm import tqdm 
 import gc  
@@ -546,53 +547,67 @@ def optimization_backtest(returns: pd.DataFrame, training_length: int, rebalance
 
 if __name__ == "__main__":
     
-    import os
-    BASE_PATH = os.path.join(os.path.dirname(__file__), "..", "data")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--demo', action='store_true', help='Run with toy data')
+    args = parser.parse_args()
+
+    BASE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
     
-    ASSET_BASE_PATHS = [
+    MIN_DATA_COMPLETENESS = 0.5       
+    MIN_START_DATE = "2008-01-01"
+    MIN_END_DATE = "2025-07-01"
+    
+    if args.demo:
+        print("Warning : We are currently running on demo mode (toy data)")
+        sample_folder = os.path.join(BASE_DIR, 'sample', 'generated')
+        ASSET_BASE_PATHS = [sample_folder]
+        MIN_START_DATE = "2022-01-01" 
+        MIN_END_DATE = "2023-06-01"   
+        MIN_DATA_COMPLETENESS = 0.0  
+    else:
+        BASE_PATH = BASE_DIR
+        ASSET_BASE_PATHS = [
+            # World (d_world_txt)
+            f"{BASE_PATH}/d_world_txt/data/daily/world/bonds",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/cryptocurrencies",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/currencies/major",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/currencies/other",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/money market",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/stooq stocks indices",
+            f"{BASE_PATH}/d_world_txt/data/daily/world/indices",
+            f"{BASE_PATH}/d_world_txt/data/daily/us",
+            f"{BASE_PATH}/d_world_txt/data/daily/uk",
+            f"{BASE_PATH}/d_world_txt/data/daily/jp",
+            f"{BASE_PATH}/d_world_txt/data/daily/macro",
 
-        # World (d_world_txt)
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\bonds",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\cryptocurrencies",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\currencies\\major",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\currencies\\other",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\money market",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\stooq stocks indices",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\world\\indices",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\us",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\uk",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\jp",
-        f"{BASE_PATH}\\d_world_txt\\data\\daily\\macro",
+            # Japan (d_jp_txt)
+            f"{BASE_PATH}/d_jp_txt/data/daily/jp/tse corporate bonds",
+            f"{BASE_PATH}/d_jp_txt/data/daily/jp/tse etfs",
+            f"{BASE_PATH}/d_jp_txt/data/daily/jp/tse futures",
+            f"{BASE_PATH}/d_jp_txt/data/daily/jp/tse indices",
+            f"{BASE_PATH}/d_jp_txt/data/daily/jp/tse options",
+            f"{BASE_PATH}/d_jp_txt/data/daily/jp/tse stocks",
+            f"{BASE_PATH}/d_jp_txt/data/daily/jp/tse treasury bonds",
 
-        # Japan (d_jp_txt)
-        f"{BASE_PATH}\\d_jp_txt\\data\\daily\\jp\\tse corporate bonds",
-        f"{BASE_PATH}\\d_jp_txt\\data\\daily\\jp\\tse etfs",
-        f"{BASE_PATH}\\d_jp_txt\\data\\daily\\jp\\tse futures",
-        f"{BASE_PATH}\\d_jp_txt\\data\\daily\\jp\\tse indices",
-        f"{BASE_PATH}\\d_jp_txt\\data\\daily\\jp\\tse options",
-        f"{BASE_PATH}\\d_jp_txt\\data\\daily\\jp\\tse stocks",
-        f"{BASE_PATH}\\d_jp_txt\\data\\daily\\jp\\tse treasury bonds",
+            # UK (d_uk_txt)
+            f"{BASE_PATH}/d_uk_txt/data/daily/uk/lse etfs/1",
+            f"{BASE_PATH}/d_uk_txt/data/daily/uk/lse etfs/2",
+            f"{BASE_PATH}/d_uk_txt/data/daily/uk/lse etfs/3",
+            f"{BASE_PATH}/d_uk_txt/data/daily/uk/lse stocks",
+            f"{BASE_PATH}/d_uk_txt/data/daily/uk/lse stocks intl/1",
+            f"{BASE_PATH}/d_uk_txt/data/daily/uk/lse stocks intl/2",
 
-        # UK (d_uk_txt)
-        f"{BASE_PATH}\\d_uk_txt\\data\\daily\\uk\\lse etfs\\1",
-        f"{BASE_PATH}\\d_uk_txt\\data\\daily\\uk\\lse etfs\\2",
-        f"{BASE_PATH}\\d_uk_txt\\data\\daily\\uk\\lse etfs\\3",
-        f"{BASE_PATH}\\d_uk_txt\\data\\daily\\uk\\lse stocks",
-        f"{BASE_PATH}\\d_uk_txt\\data\\daily\\uk\\lse stocks intl\\1",
-        f"{BASE_PATH}\\d_uk_txt\\data\\daily\\uk\\lse stocks intl\\2",
-
-        # USA (d_us_txt)
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nasdaq etfs",
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nasdaq stocks\\1",
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nasdaq stocks\\2",
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nasdaq stocks\\3",
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nyse etfs\\1", 
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nyse etfs\\2",
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nyse stocks\\1",
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nyse stocks\\2",
-        f"{BASE_PATH}\\d_us_txt\\data\\daily\\us\\nysemkt stocks",
-
-    ]
+            # USA (d_us_txt)
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nasdaq etfs",
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nasdaq stocks/1",
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nasdaq stocks/2",
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nasdaq stocks/3",
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nyse etfs/1", 
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nyse etfs/2",
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nyse stocks/1",
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nyse stocks/2",
+            f"{BASE_PATH}/d_us_txt/data/daily/us/nysemkt stocks",
+        ]
     
     MIN_DATA_COMPLETENESS = 0.5       
     TARGET_RETURN = 0.01 / 100        
@@ -609,6 +624,7 @@ if __name__ == "__main__":
     STOCHASTIC_SCENARIOS = 10       
     MIN_START_DATE = "2008-01-01"
     MIN_END_DATE = "2025-07-01"
+    RISK_FREE_RATE_ANNUAL = 0.044
     
     dfs = load_stooq_assets_glob_all(ASSET_BASE_PATHS)
     raw_prices = align_and_merge_prices(dfs)
@@ -684,7 +700,10 @@ if __name__ == "__main__":
         oos_returns = out_of_sample_returns.dot(w_vec)
         realized_return = oos_returns.mean()
         realized_mad = np.mean(np.abs(oos_returns - realized_return))
-        sharpe_ratio = (realized_return / oos_returns.std()) * np.sqrt(252) if oos_returns.std() > 0 else 0
+        rf_daily = RISK_FREE_RATE_ANNUAL / 252
+        excess_daily_returns = oos_returns - rf_daily
+        sharpe_ratio = (excess_daily_returns.mean() / oos_returns.std()) * np.sqrt(252) if oos_returns.std() > 0 else 0
+        
         results.append({"Strategy": name, "Annualized return (%)": realized_return * 252 * 100, "Annualized MAD (%)": realized_mad * np.sqrt(252) * 100, "Sharpe ratio": sharpe_ratio,})
 
     static_results_df = pd.DataFrame(results).set_index("Strategy")
@@ -746,6 +765,47 @@ if __name__ == "__main__":
     plt.grid(True)
     plt.show()
 
+    valid_backtest_idx = dynamic_returns['Dynamic MILP'].index
+    oos_idx = out_of_sample_returns.index
+    
+    proper_dates = oos_idx.intersection(valid_backtest_idx)
+
+    print(f"Plotting range adjusted: {proper_dates.min().date()} to {proper_dates.max().date()}")
+
+    milp_curve = (1 + dynamic_returns['Dynamic MILP'].loc[proper_dates]).cumprod() * 100
+    stoch_curve = (1 + dynamic_returns['Dynamic Stochastic'].loc[proper_dates]).cumprod() * 100
+    lp_curve = (1 + dynamic_returns['Dynamic LP'].loc[proper_dates]).cumprod() * 100
+
+    eq_weights = np.full(returns.shape[1], 1/returns.shape[1])
+    bench_rets = out_of_sample_returns.loc[proper_dates].dot(eq_weights)
+    bench_curve = (1 + bench_rets).cumprod() * 100
+
+    def get_dd(series): 
+        return (series - series.cummax()) / series.cummax()
+    
+    dd_milp = get_dd(milp_curve)
+    dd_stoch = get_dd(stoch_curve)
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True, gridspec_kw={'height_ratios': [2, 1]})
+
+    ax1.plot(milp_curve, label='Dynamic MILP', color='#1f77b4', linewidth=2)
+    ax1.plot(stoch_curve, label='Dynamic Stochastic', color='#2ca02c', alpha=0.7)
+    ax1.plot(bench_curve, label='Benchmark (Eq Weight)', color='gray', linestyle='--')
+    ax1.set_ylabel('Wealth ($)')
+    ax1.set_title('Out-of-Sample Performance')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+
+    ax2.fill_between(dd_milp.index, dd_milp, 0, color='#1f77b4', alpha=0.3, label='MILP Drawdown')
+    ax2.plot(dd_stoch, color='#2ca02c', linewidth=1, label='Stoch Drawdown')
+    ax2.set_ylabel('Drawdown (%)')
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+    ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:.0%}'))
+
+    plt.tight_layout()
+    plt.savefig('figure1_wealth_drawdown.png', dpi=300)
+    plt.show()
 
 
 
