@@ -46,7 +46,6 @@ To reproduce the full analysis, the raw data files must be downloaded directly f
 
 The downloaded data must then be organized into the following explicit structure under the project root (`From_Deterministic_to_Stochastic_Portfolio_Optimization/`), matching the paths defined in the code:
 
-````
 
 └── data/
 ├── d\_world\_txt/
@@ -54,7 +53,6 @@ The downloaded data must then be organized into the following explicit structure
 ├── d\_uk\_txt/
 └── d\_jp\_txt/
 
-```
 
 ## 📊 Key Results
 
