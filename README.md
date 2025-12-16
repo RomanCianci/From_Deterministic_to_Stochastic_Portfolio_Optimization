@@ -110,9 +110,9 @@ An empirical analysis of the 2022–2025 volatile period shows:
 
 ## 👥 Contributors
 
-* **Roman Cianci** – Sourced the Stooq dataset; implemented the MILP model with cardinality constraints; formulated the stochastic optimization model; managed the GitHub repository and documentation.
-* **Timothé Compagnion** – Implemented bootstrap-based scenario generation and authored results analysis.
-* **Robin Lebrevelec** – Developed rolling-window backtesting engine, performed sensitivity analysis, and drafted introduction and literature review.
+* **Roman Cianci** Sourced the high-dimensional Stooq dataset (8,405 assets); implemented the MILP model with cardinality constraints and the stochastic optimization model; developed the rolling-window backtesting engine; managed the GitHub repository and co-authored Methodology and Discussion.
+* **Timothé Compagnion** Implemented bootstrap-based scenario generation; conducted sensitivity analysis; authored the Results section; created the Efficient Frontier visualization.
+* **Robin Lebrevelec** Developed the Two-Stage Screening Heuristic; performed computational cost analysis; drafted the Introduction and Literature Review.
 
 ---
 
