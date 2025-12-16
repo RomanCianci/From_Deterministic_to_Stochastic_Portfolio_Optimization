@@ -1,143 +1,15 @@
 import pandas as pd
 import numpy as np
 import pulp as pl
-from typing import Dict, Optional, List
-import matplotlib.pyplot as plt
-import glob
 import argparse
 import os
-
-
-
-
-def compute_mad(returns: pd.DataFrame, w: np.ndarray) -> float:
-    """
-    Computes the Mean Average Deviation of the portfolio.
-
-    Args : 
-        returns (DataFrame) : all the returns from the assets.
-        w (ndarray) : weights of the assets.
-    
-    Returns : 
-        Mean Average Deviation of the portfolio.    
-    """
-    w = np.array(w)
-    portfolio_returns = returns.values.dot(w)
-    mean_return = portfolio_returns.mean()
-    mad = np.mean(np.abs(portfolio_returns - mean_return))
-
-    return mad
-
-def compute_returns(prices: pd.DataFrame) -> pd.DataFrame:
-    """
-    Computes daily returns from prices.
-
-    Args : 
-        prices (DataFrame) : prices of the assets.
-    
-    Returns : 
-        Dataframe of daily returns for each asset.
-    """
-    return prices.pct_change().dropna(how="all")
-
-def clean_asset_file(file_path: str, ticker: str, parse_dates: bool = True, dayfirst: bool = False) -> pd.DataFrame:
-    """
-    Load an asset CSV/TXT file and clean it.
-
-    Args : 
-        file_path (str) : path of the CSV file.
-        ticker (str) : ticker of the asset.
-        parse_dates (bool) : True if should convert date column in datetime.
-        dayfirst (bool) : True if DD/MM/YY, False otherwise.
-
-    Returns : 
-        Cleaned CSV file of dates/prices for the asset.
-    """
-    DATE_COL_STOOQ = "<DATE>"
-    CLOSE_COL_STOOQ = "<CLOSE>"
-    DATE_COL_FINAL = "Date"
-    try:
-        df = pd.read_csv(file_path, sep=",", encoding="utf-8-sig")
-    except: return pd.DataFrame()
-
-    if DATE_COL_STOOQ not in df.columns or CLOSE_COL_STOOQ not in df.columns: return pd.DataFrame()
-
-    df = df.rename(columns={DATE_COL_STOOQ: DATE_COL_FINAL})
-    price_col = CLOSE_COL_STOOQ
-    df = df[[DATE_COL_FINAL, price_col]].rename(columns={price_col: ticker})
-    
-    if parse_dates:
-        df[DATE_COL_FINAL] = pd.to_datetime(df[DATE_COL_FINAL], format="%Y%m%d", errors='coerce')
-
-    df = df.dropna(subset=[DATE_COL_FINAL])
-    df = df.set_index(DATE_COL_FINAL).sort_index()
-    return df
-
-def align_and_merge_prices(price_dfs: Dict[str, pd.DataFrame]) -> pd.DataFrame:
-    """
-    Merge and align asset price DataFrames.
-
-    Args : 
-        prices (Dict[str, pd.DataFrame]) : prices for each asset.
-
-    Returns :    
-        Merged and aligned asset price DataFrames.
-    """
-    if not price_dfs: return pd.DataFrame()
-    first_ticker = next(iter(price_dfs))
-    merged_df = price_dfs[first_ticker].reset_index().sort_values("Date")
-    for ticker, ticker_df in price_dfs.items():
-        if ticker != first_ticker:
-            ticker_df = ticker_df.reset_index().sort_values("Date")
-            merged_df = pd.merge_asof(merged_df, ticker_df, on="Date", direction="nearest", tolerance=pd.Timedelta(days=7))
-    prices = merged_df.set_index("Date")
-    return prices.dropna(how='any').sort_index()
-
-def load_stooq_assets_glob_all(base_paths: List[str]) -> Dict[str, pd.DataFrame]:
-    """
-    Finds and loads ALL Stooq asset data from multiple directories recursively.
-    """
-    dfs = {}
-    found_files = {}
-    print("Searching for assets...")
-    for base_path in base_paths:
-        file_list = glob.glob(os.path.join(base_path, "**/*.txt"), recursive=True) + glob.glob(os.path.join(base_path, "**/*.csv"), recursive=True)
-        for file_path in file_list:
-            ticker = os.path.splitext(os.path.basename(file_path))[0]
-            if ticker not in found_files: found_files[ticker] = file_path
-            
-    print(f"Found {len(found_files)} potential asset files.")
-    
-    loaded_count = 0
-    for i, (ticker, file_path) in enumerate(found_files.items()):
-        if (i+1)%100==0: print(f"Loaded {i+1}...")
-        try:
-            df = clean_asset_file(file_path, ticker)
-            if not df.empty: 
-                dfs[ticker] = df
-                loaded_count += 1
-        except: pass
-    
-    print(f"Successfully loaded data for {loaded_count} assets.")
-    return dfs
-
-# New function
+import matplotlib.pyplot as plt
+import utils
 
 def optimize_dynamic_mad_lp(returns: pd.DataFrame, target_return: float, periods: int, max_turnover: float, transaction_cost: float = 0.0):
     """
     This solves the linearized version of our problem with turnover constraints.
-    
-    Args:
-        returns (DataFrame) : all the returns from the assets.
-        target_return (float) : the minimum return we aim for.
-        periods (int) : number of iterations to optimize the portfolio.
-        max_turnover (float) : maximum allowed turnover per period.
-        transaction_cost (float) : % to pay for changing weights of the assets.
-        
-    Returns:
-        List of optimal weights per period.
     """
-
     N = len(returns)
     period_len = N // periods
     assets = returns.columns.tolist()
@@ -157,7 +29,6 @@ def optimize_dynamic_mad_lp(returns: pd.DataFrame, target_return: float, periods
         period_returns = returns.iloc[start:end]
         
         # --- CONSTRAINTS ---
-        
         T_period = len(period_returns)
         assets_period = list(period_returns.columns)
         
@@ -220,9 +91,6 @@ def optimize_dynamic_mad_lp(returns: pd.DataFrame, target_return: float, periods
     return weights_periods
 
 
-
-
-
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
@@ -233,7 +101,7 @@ if __name__ == "__main__":
 
     if args.demo:
         print("Warning : We are currently running on demo mode (toy data)")
-        BASE_PATH = os.path.join(BASE_DIR, 'sample')
+        BASE_PATH = os.path.join(BASE_DIR, 'sample', 'generated')
         WORLD_BASE_PATHS = [BASE_PATH]
     else:
         BASE_PATH = BASE_DIR
@@ -247,16 +115,14 @@ if __name__ == "__main__":
             f"{BASE_PATH}/d_world_txt/data/daily/world/indices",
         ]
     
-
-    dfs = load_stooq_assets_glob_all(WORLD_BASE_PATHS)
-    prices = align_and_merge_prices(dfs)
-    returns = compute_returns(prices)
+    dfs = utils.load_stooq_assets_glob_all(WORLD_BASE_PATHS)
+    prices = utils.align_and_merge_prices(dfs)
+    returns = utils.compute_returns(prices)
 
     if returns.empty:
         print("Error : No common data period found...")
         
     else:
-
         target_return = 0.05 / 100
         periods = 20
         transaction_cost = 0.001
@@ -285,11 +151,3 @@ if __name__ == "__main__":
         
         plt.tight_layout()
         plt.show()
-
-
-
-
-
-
-
-
