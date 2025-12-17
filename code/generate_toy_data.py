@@ -4,7 +4,13 @@ import os
 from datetime import datetime, timedelta
 
 DATA_ROOT = os.path.join(os.path.dirname(__file__), '..', 'data', 'sample')
-ASSETS = ['US_EQ_1', 'JP_EQ_1', 'UK_BOND_1', 'WLD_COMM_1']
+ASSETS = [
+    'US_EQ_1', 'JP_EQ_1', 'UK_BOND_1', 'WLD_COMM_1',
+    'US_EQ_2', 'US_BOND_1', 'EU_EQ_1', 'EU_BOND_1',
+    'JP_BOND_1', 'UK_EQ_1', 'CN_EQ_1', 'EM_EQ_1',
+    'WLD_REIT_1', 'US_TECH_1', 'EU_FIN_1', 'JP_IND_1',
+    'GOLD_1', 'OIL_1', 'US_SMALL_1', 'INT_HY_BOND_1'
+]
 DAYS = 500  
 
 def generate_asset_history(name, seed):

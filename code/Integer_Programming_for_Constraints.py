@@ -13,8 +13,10 @@ if __name__ == "__main__":
 
     BASE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 
-    if args.demo:
-        print("Warning : We are currently running on demo mode (toy data)")
+    if args.demo or not os.path.exists(os.path.join(BASE_DIR, 'd_world_txt')):
+        if not args.demo:
+            print("Real data available on Stooq (very long to download and run the code)")
+        print("--- DEMO MODE ---")
         BASE_PATH = os.path.join(BASE_DIR, 'sample', 'generated')
         WORLD_BASE_PATHS = [BASE_PATH]
     else:

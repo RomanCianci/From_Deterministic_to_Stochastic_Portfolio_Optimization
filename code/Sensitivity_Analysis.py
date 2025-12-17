@@ -189,8 +189,10 @@ if __name__ == "__main__":
 
     BASE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
     
-    if args.demo:
-        print("Warning : We are currently running on demo mode (toy data)")
+    if args.demo or not os.path.exists(os.path.join(BASE_DIR, 'd_world_txt')):
+        if not args.demo:
+            print("Real data available on Stooq (very long to download and run the code)")
+        print("--- DEMO MODE ---")
         BASE_PATH = os.path.join(BASE_DIR, 'sample', 'generated')
         WORLD_BASE_PATHS = [BASE_PATH]
     else:
@@ -253,3 +255,9 @@ if __name__ == "__main__":
 
         print("\nTop 5 Variance Assets (LP):")
         for k, v in list(weight_var_lp.items())[:5]: print(f"{k}: {v:.6f}")
+        
+        print("\nTop 5 Variance Assets (MILP):")
+        for k, v in list(weight_var_milp.items())[:5]: print(f"{k}: {v:.6f}")
+        
+        print("\nTop 5 Variance Assets (Stochastic):")
+        for k, v in list(weight_var_stoch.items())[:5]: print(f"{k}: {v:.6f}")
