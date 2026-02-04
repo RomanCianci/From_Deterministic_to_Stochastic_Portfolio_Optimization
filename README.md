@@ -15,7 +15,7 @@ A comparative analysis of **Linear Programming (LP)**, **Mixed-Integer Linear Pr
   * `Stochastic_Optimization.py` – Scenario-based optimization using bootstrapped return paths to minimize Expected MAD.
   * `Dynamic_Rebalancing.py` – Demonstrates dynamic rebalancing logic with turnover constraints over multiple periods.
   * `Sensitivity_Analysis.py` – Tools for plotting comparative efficient frontiers and analyzing weight stability.
-  * `result_tables.py` – Parses the backtest CSV to calculate metrics.
+  * `result_tables.py` – Parses the backtest CSV to calculate metrics.
   * `generate_toy_data.py` – Generates synthetic data for the *Toy Model* demo.
 
 * **`data/`**:
