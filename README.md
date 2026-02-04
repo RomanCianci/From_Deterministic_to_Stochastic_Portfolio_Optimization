@@ -1,118 +1,148 @@
 # From Deterministic to Stochastic Portfolio Optimization
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
-![Status](https://img.shields.io/badge/status-complete-green)
-
-A comparative analysis of **Linear Programming (LP)**, **Mixed-Integer Linear Programming (MILP)**, and **Scenario-Based Stochastic Optimization** applied to high-dimensional asset universes ($N \gg T$). This project demonstrates how cardinality constraints can act as effective regularizers in volatile markets, often outperforming unconstrained stochastic approaches.
+A comparative analysis of **Linear Programming (LP)**, **Mixed-Integer Linear Programming (MILP)**, and **Scenario-Based Stochastic Optimization** applied to high-dimensional asset universes (). This project demonstrates how cardinality constraints act as effective  regularizers, providing essential noise filtering in volatile markets where unconstrained models often overfit.
 
 ---
 
 ## 📂 Repository Structure
 
 * **`code/`**: Python implementations of the optimization models.
+* 
+`utils.py` – **Shared utility functions** for data loading, Point-in-Time alignment, and MAD solver logic.
 
-  * `utils.py` – **Shared utility functions** for data loading, cleaning, merging, and common solver logic.
-  * `Portfolio_Comparison.py` – **Main driver script**: runs rolling-window backtests for all models (LP, MILP, Stochastic), generates performance metrics, and plots results.
-  * `Linear_Portfolio_Optimization.py` – Base Mean Absolute Deviation (MAD) LP model. Calculates and exports the efficient frontier.
-  * `Integer_Programming_for_Constraints.py` – MILP formulation with cardinality constraints ($K \le 10$) and buy-in thresholds.
-  * `Stochastic_Optimization.py` – Scenario-based optimization using bootstrapped return paths to minimize Expected MAD.
-  * `Dynamic_Rebalancing.py` – Demonstrates dynamic rebalancing logic with turnover constraints over multiple periods.
-  * `Sensitivity_Analysis.py` – Tools for plotting comparative efficient frontiers and analyzing weight stability.
-  * `generate_toy_data.py` – Generates synthetic data for the *Toy Model* demo.
+
+* 
+`Portfolio_Comparison.py` – **Main driver script**: Runs rigorous rolling-window backtests using a **Point-in-Time (PIT)** framework to eliminate look-ahead bias.
+
+
+* 
+`Linear_Portfolio_Optimization.py` – Base Mean Absolute Deviation (MAD) LP model.
+
+
+* 
+`Integer_Programming_for_Constraints.py` – MILP formulation with cardinality constraints ().
+
+
+* 
+`Stochastic_Optimization.py` – Scenario-based optimization using bootstrapped returns.
+
+
+* 
+`Dynamic_Rebalancing.py` – Demonstrates multi-period rebalancing with turnover constraints.
+
+
+* 
+`Sensitivity_Analysis.py` – Tools for analyzing efficient frontiers and weight stability.
+
+
+
 
 * **`data/`**:
+* `sample/` – **Toy dataset** for immediate reproducibility.
 
-  * `sample/` – **Toy dataset** for immediate reproducibility and code verification.
-    *(Note: The full ~1 GB Stooq dataset is excluded due to size constraints; see **Full Replication** below.)*
+
+(Note: The full ~1 GB Stooq dataset containing 8,405 global assets is excluded from Git due to size; see Replication below).
+
+
+
 
 * **`paper/`**:
+* 
+`Portfolio_Optimization_Paper.pdf` – Full scientific manuscript with corrected PIT results.
 
-  * `Final_Report.pdf` – Full scientific manuscript detailing methodology and results.
-  * `source/` – LaTeX source files for the report.
+
+
+
 
 ---
 
 ## 🚀 Quick Start (Toy Model / Demo Mode)
-
-Verify functionality without downloading the full Stooq dataset using the built-in **Demo Mode**, which relies on synthetic data.
 
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/RomanCianci/From_Deterministic_to_Stochastic_Portfolio_Optimization.git
 cd From_Deterministic_to_Stochastic_Portfolio_Optimization/code
+
 ```
 
 ### 2. Install dependencies
 
 ```bash
 pip install -r ../requirements.txt
+
 ```
 
-### 3. Generate the toy data
-
-```bash
-python generate_toy_data.py
-```
-
-This creates a `../data/sample/generated/` directory containing synthetic asset return series.
-
-### 4. Run the backtest in Demo Mode
+### 3. Run the backtest in Demo Mode
 
 ```bash
 python Portfolio_Comparison.py --demo
+
 ```
 
-The script runs LP, MILP, and Stochastic models on the toy dataset and generates performance plots (wealth curves and portfolio composition).
+The script runs LP, MILP, and Stochastic models on synthetic data and generates performance plots.
 
 ---
 
 ## 📈 Full Replication (Real Data)
 
-To reproduce the full empirical results reported in the paper (N = 8,405 assets):
+To reproduce the empirical results reported in the paper (N = 8,405 assets):
 
-### 1. Download the data
+1. 
+**Download the data**: Sourced from the [Stooq Database](https://stooq.com/db/h/).
 
-Download historical daily price data from the [Stooq Database](https://stooq.com/db/h/).
 
-### 2. Organize the folders
+2. 
+**Organize folders**: Extract into `data/` under `d_world_txt/`, `d_us_txt/`, `d_uk_txt/`, and `d_jp_txt/`.
 
-Extract the data into the `data/` directory with the following structure:
 
-```
-data/
-├── d_world_txt/
-├── d_us_txt/
-├── d_uk_txt/
-└── d_jp_txt/
-```
-
-### 3. Run the analysis
-
+3. **Run the analysis**:
 ```bash
 python Portfolio_Comparison.py
+
 ```
 
-> **Note:** Full replication requires substantial RAM and CPU time due to the size of the asset universe and the computational complexity of the MILP solver.
+
+
+Note: This utilizes a Two-Stage Screening Heuristic to maintain computational tractability.
+
+
 
 ---
 
 ## 📊 Key Results
 
-An empirical analysis of the 2022–2025 volatile period shows:
+The empirical analysis of the 2022–2025 period, corrected for survivorship and look-ahead bias, shows:
 
-1. **Dynamic MILP** achieved the highest risk-adjusted performance (**Sharpe Ratio: 3.09**), leveraging cardinality constraints ($K \le 10$) to effectively filter high-volatility noise.
-2. **Dynamic Stochastic Optimization** delivered the highest raw returns (**22.07% annualized**) but exhibited significant drawdowns and turnover, highlighting the curse of dimensionality in scenario generation.
-3. **Unconstrained LP** consistently underperformed, confirming that in high-dimensional settings ($N \gg T$), sparsity is not merely a constraint but a necessary form of regularization.
+1. 
+**Dynamic MILP** achieved superior risk-adjusted performance (**Sharpe Ratio: 0.64**), successfully using cardinality constraints () to filter out "toxic" assets.
+
+
+2. 
+**Dynamic LP** remained profitable but was diluted by over-diversification, yielding an annualized return of **1.67%**—roughly half that of the MILP strategy.
+
+
+3. 
+**Stochastic Optimization** failed in high dimensions (), suffering a **-41.25% annualized loss** due to overfitting to noisy data artifacts in scenario generation.
+
+
 
 ---
 
 ## 👥 Contributors
 
-* **Roman Cianci** Sourced the high-dimensional Stooq dataset (8,405 assets); implemented the MILP model with cardinality constraints and the stochastic optimization model; developed the rolling-window backtesting engine; managed the GitHub repository and co-authored Methodology and Discussion.
-* **Timothé Compagnion** Implemented bootstrap-based scenario generation; conducted sensitivity analysis; authored the Results section; created the Efficient Frontier visualization.
-* **Robin Lebrevelec** Developed the Two-Stage Screening Heuristic; performed computational cost analysis; drafted the Introduction and Literature Review.
+* 
+**Roman Cianci**: Dataset sourcing, MILP/Stochastic implementation, backtesting engine, and co-authored methodology.
+
+
+* 
+**Timothé Compagnion**: Bootstrap scenario generation, results authorship, and frontier visualization.
+
+
+* 
+**Robin Lebrevelec**: Two-Stage Screening Heuristic, computational analysis, and introduction/literature review.
+
+
 
 ---
 
