@@ -6,26 +6,23 @@ A comparative analysis of **Linear Programming (LP)**, **Mixed-Integer Linear Pr
 
 ## 📂 Repository Structure
 
-* **`code/`**: Python implementations of the optimization models.
+- **`code/`**: Python implementations of the optimization models.
+  - `utils.py` – **Shared utility functions** for data loading, cleaning, merging, and common solver logic.
+  - `Portfolio_Comparison.py` – **Main driver script**: runs rolling-window backtests for all models (LP, MILP, Stochastic), generates performance metrics, and plots results.
+  - `Linear_Portfolio_Optimization.py` – Base Mean Absolute Deviation (MAD) LP model. Calculates and exports the efficient frontier.
+  - `Integer_Programming_for_Constraints.py` – MILP formulation with cardinality constraints ($K \le 10$) and buy-in thresholds.
+  - `Stochastic_Optimization.py` – Scenario-based optimization using bootstrapped return paths to minimize Expected MAD.
+  - `Dynamic_Rebalancing.py` – Demonstrates dynamic rebalancing logic with turnover constraints over multiple periods.
+  - `Sensitivity_Analysis.py` – Tools for plotting comparative efficient frontiers and analyzing weight stability.
+  - `result_tables.py` – Parses the backtest CSV to calculate metrics.
+  - `generate_toy_data.py` – Generates synthetic data for the *Toy Model* demo.
 
-  * `utils.py` – **Shared utility functions** for data loading, cleaning, merging, and common solver logic.
-  * `Portfolio_Comparison.py` – **Main driver script**: runs rolling-window backtests for all models (LP, MILP, Stochastic), generates performance metrics, and plots results.
-  * `Linear_Portfolio_Optimization.py` – Base Mean Absolute Deviation (MAD) LP model. Calculates and exports the efficient frontier.
-  * `Integer_Programming_for_Constraints.py` – MILP formulation with cardinality constraints ($K \le 10$) and buy-in thresholds.
-  * `Stochastic_Optimization.py` – Scenario-based optimization using bootstrapped return paths to minimize Expected MAD.
-  * `Dynamic_Rebalancing.py` – Demonstrates dynamic rebalancing logic with turnover constraints over multiple periods.
-  * `Sensitivity_Analysis.py` – Tools for plotting comparative efficient frontiers and analyzing weight stability.
-  * `result_tables.py` – Parses the backtest CSV to calculate metrics.
-  * `generate_toy_data.py` – Generates synthetic data for the *Toy Model* demo.
+- **`data/`**:
+  - `sample/` – **Toy dataset** for immediate reproducibility and code verification.
+    - *(Note: The full ~1 GB Stooq dataset is excluded due to size constraints; see **Full Replication** below.)*
 
-* **`data/`**:
-
-  * `sample/` – **Toy dataset** for immediate reproducibility and code verification.
-    *(Note: The full ~1 GB Stooq dataset is excluded due to size constraints; see **Full Replication** below.)*
-
-* **`paper/`**:
-
-  * `From_Deterministic_to_Stochastic_Portfolio_Optimization___Roman_CIANCI__Timothé_COMPAGNION__Robin_LEBREVELEC.pdf` – Full scientific manuscript detailing methodology and results.
+- **`paper/`**:
+  - `From_Deterministic_to_Stochastic_Portfolio_Optimization___Roman_CIANCI__Timothé_COMPAGNION__Robin_LEBREVELEC.pdf` – Full scientific manuscript detailing methodology and results.
 
 ---
 
