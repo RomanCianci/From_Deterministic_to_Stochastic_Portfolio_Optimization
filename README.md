@@ -25,8 +25,7 @@ A comparative analysis of **Linear Programming (LP)**, **Mixed-Integer Linear Pr
 
 * **`paper/`**:
 
-  * `Final_Report.pdf` – Full scientific manuscript detailing methodology and results.
-  * `source/` – LaTeX source files for the report.
+  * `From_Deterministic_to_Stochastic_Portfolio_Optimization___Roman_CIANCI__Timothé_COMPAGNION__Robin_LEBREVELEC.pdf` – Full scientific manuscript detailing methodology and results.
 
 ---
 
