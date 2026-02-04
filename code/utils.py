@@ -77,7 +77,7 @@ def align_and_merge_prices(price_dfs: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     gc.collect()
     
     
-    return merged.dropna(how='any')
+    return merged.dropna(how='all').fillna(method='ffill')
 
 def load_stooq_assets_glob_all(base_paths: List[str], min_rows: int = 0) -> Dict[str, pd.DataFrame]:
     """Finds and loads Stooq asset data from multiple directories recursively."""

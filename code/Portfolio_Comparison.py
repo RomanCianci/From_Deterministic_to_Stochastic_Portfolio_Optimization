@@ -130,12 +130,23 @@ def optimization_backtest(returns: pd.DataFrame, training_length: int, rebalance
     
     for k in tqdm(range(num_iterations), desc=f"Backtesting {optimization_type.__name__}"):
         i = training_length + k * rebalance_frequency
+        
+        current_date = returns.index[i]
+        
         train_start = max(0, i - training_length)
         train_end = i
         
-        current_date = returns.index[i]
+        window_data = returns.iloc[train_start:train_end]
+        valid_assets_mask = window_data.count() > (0.7 * len(window_data))
+        valid_assets = window_data.columns[valid_assets_mask].tolist()
+        
+        if not valid_assets:
+            print(f"Warning: No valid assets found at step {k}")
+            continue
 
-        training_returns = returns.iloc[train_start:train_end]
+        training_returns = window_data[valid_assets].copy()
+        training_returns = training_returns.fillna(0.0)
+        
         current_returns = training_returns.copy()
 
         if asset_filter_limit:
@@ -172,13 +183,17 @@ def optimization_backtest(returns: pd.DataFrame, training_length: int, rebalance
         # Apply to Test Window
         test_start = i
         test_end = min(i + rebalance_frequency, len(returns))
-        testing_returns = returns.iloc[test_start:test_end]
+        testing_returns = returns.iloc[test_start:test_end][valid_assets]
+        
+        testing_returns = testing_returns.fillna(0.0)
 
         if testing_returns.empty:
             current_weights = new_weights
             continue
 
-        period_portfolio_returns = testing_returns.values.dot(new_weights)
+        aligned_weights = np.array([optimal_weights_dict.get(a, 0.0) for a in valid_assets])
+        
+        period_portfolio_returns = testing_returns.values.dot(aligned_weights)
         if period_portfolio_returns.size > 0:
             period_portfolio_returns[0] -= cost
 
@@ -275,7 +290,7 @@ if __name__ == "__main__":
     dfs = utils.load_stooq_assets_glob_all(ASSET_BASE_PATHS, min_rows=252)
     raw_prices = utils.align_and_merge_prices(dfs)
     
-    prices = filter_by_data_completeness(raw_prices, MIN_DATA_COMPLETENESS, start_date=MIN_START_DATE, end_date=MIN_END_DATE)
+    prices = raw_prices.loc[MIN_START_DATE:MIN_END_DATE].copy()
     returns = utils.compute_returns(prices).fillna(0.0)
     returns = returns.loc[MIN_START_DATE:] 
     split_point = int(len(returns) * TRAIN_TEST_SPLIT)
@@ -308,8 +323,6 @@ if __name__ == "__main__":
     weights_data['Dynamic Stochastic'] = w_stoch
 
 
-
-    print("\nGenerating Figure 1 (Wealth)...")
     common_idx = results_data['Dynamic MILP'].index.intersection(out_of_sample_returns.index)
     
     milp_curve = (1 + results_data['Dynamic MILP'].loc[common_idx]).cumprod() * 100
@@ -360,3 +373,35 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig('figure3_milp_composition.png', dpi=300)
     print("Saved figure3_milp_composition.png")
+
+    print("\n" + "="*30)
+
+    for name, series in results_data.items():
+        ann_ret = series.mean() * 252
+        ann_vol = series.std() * np.sqrt(252)
+        sharpe = ann_ret / ann_vol if ann_vol != 0 else 0
+        wealth = (1 + series).cumprod()
+        max_dd = ((wealth - wealth.cummax()) / wealth.cummax()).min()
+        
+        print(f"\n--- {name}")
+        print(f"Annualized Return: {ann_ret:.2%}")
+        print(f"Annualized Vol:    {ann_vol:.2%}")
+        print(f"Sharpe Ratio:      {sharpe:.2f}")
+        print(f"Max Drawdown:      {max_dd:.2%}")
+
+    results_df = pd.DataFrame(results_data)
+    results_df.to_csv("backtest_results_final.csv")
+
+    eq_weights = np.full(returns.shape[1], 1/returns.shape[1])
+    bench_rets_series = returns.loc[common_idx].dot(eq_weights)
+    ann_ret_b = bench_rets_series.mean() * 252
+    ann_vol_b = bench_rets_series.std() * np.sqrt(252)
+    sharpe_b = ann_ret_b / ann_vol_b if ann_vol_b != 0 else 0
+    wealth_b = (1 + bench_rets_series).cumprod()
+    max_dd_b = ((wealth_b - wealth_b.cummax()) / wealth_b.cummax()).min()
+
+    print(f"\n--- Benchmark")
+    print(f"Annualized Return: {ann_ret_b:.2%}")
+    print(f"Annualized Vol:    {ann_vol_b:.2%}")
+    print(f"Sharpe Ratio:      {sharpe_b:.2f}")
+    print(f"Max Drawdown:      {max_dd_b:.2%}")
